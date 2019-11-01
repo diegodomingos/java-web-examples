@@ -1,0 +1,9 @@
+server:
+  adminConnectors:
+    - type: http
+      port: 8082
+database:
+  driverClass: com.mysql.jdbc.Driver
+  user: phonebookuser
+  password: phonebookpassword
+  url: jdbc:mysql://localhost/phonebook
