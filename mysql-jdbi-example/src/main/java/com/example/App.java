@@ -5,6 +5,8 @@ import com.example.dao.ContactDAO;
 import com.example.dao.UserDAO;
 import com.example.model.User;
 import com.example.resources.ContactResource;
+import com.google.inject.Guice;
+import com.google.inject.Injector;
 import io.dropwizard.Application;
 import io.dropwizard.auth.AuthDynamicFeature;
 import io.dropwizard.auth.AuthValueFactoryProvider;
@@ -26,11 +28,12 @@ public class App extends Application<AppConfiguration> {
     public void run(AppConfiguration configuration, Environment environment) throws Exception {
         LOGGER.info("Method App#run() called");
 
-        final DBIFactory factory = new DBIFactory();
-        final DBI jdbi = factory.build(environment, configuration.getDataSourceFactory(), "mysql");
-        environment.jersey().register(new ContactResource(jdbi.onDemand(ContactDAO.class)));
+        Injector injector = Guice.createInjector(new AppModule(configuration, environment));
+        ContactResource contactResource = injector.getInstance(ContactResource.class);
+        PhonebookAuthenticator authenticator = injector.getInstance(PhonebookAuthenticator.class);
+        environment.jersey().register(contactResource);
         environment.jersey().register(new AuthDynamicFeature(new BasicCredentialAuthFilter.Builder<User>()
-                .setAuthenticator(new PhonebookAuthenticator(jdbi.onDemand(UserDAO.class)))
+                .setAuthenticator(authenticator)
                 .setRealm("BASIC-AUTH-REAL")
                 .buildAuthFilter()));
         environment.jersey().register(new AuthValueFactoryProvider.Binder<>(User.class));

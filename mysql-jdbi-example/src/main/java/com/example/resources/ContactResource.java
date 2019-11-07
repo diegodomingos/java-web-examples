@@ -3,7 +3,9 @@ package com.example.resources;
 import com.example.dao.ContactDAO;
 import com.example.model.Contact;
 import com.example.model.User;
+import com.google.inject.Inject;
 import io.dropwizard.auth.Auth;
+import org.skife.jdbi.v2.DBI;
 
 import javax.validation.Valid;
 import javax.ws.rs.*;
@@ -17,8 +19,9 @@ import java.net.URISyntaxException;
 public class ContactResource {
     private final ContactDAO contactDAO;
 
-    public ContactResource(ContactDAO contactDAO) {
-        this.contactDAO = contactDAO;
+    @Inject
+    public ContactResource(DBI jdbi) {
+        this.contactDAO = jdbi.onDemand(ContactDAO.class);
     }
 
     @GET
